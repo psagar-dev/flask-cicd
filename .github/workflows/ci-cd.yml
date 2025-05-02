@@ -3,8 +3,10 @@ run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
     push:
         branches:
-          - main
-
+          - staging
+    release:
+        types:
+            - published
 jobs:
     install-dependencies:
         runs-on: ubuntu-latest
@@ -42,10 +44,28 @@ jobs:
             - name: Run tests
               run: |
                 python -m pytest tests/
-    
-    build:
+
+    deploy-staging:
         runs-on: ubuntu-latest
         needs: run-tests
+        if: github.ref == 'refs/heads/staging'
         steps:
-            - name: Prepare app for deployment
-              run: echo "Build completed successfully."
+            - name: Deploy to Staging
+              run: |
+                echo "Deploying to staging..."
+
+            - name: Notify via Slack or Email (optional)
+              run: echo "Staging deployment finished."
+              
+    deploy-production:
+        runs-on: ubuntu-latest
+        needs: run-tests
+        if: github.event_name == 'release' && github.event.action == 'published'
+        steps:
+            - name: Deploy to Production
+              run: |
+                echo "Deploying to production..."
+                curl -X POST ${{ secrets.PROD_DEPLOY_URL }}
+
+            - name: Notify Stakeholders
+              run: echo "Production deployment finished."
