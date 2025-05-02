@@ -8,7 +8,7 @@ on:
         types:
             - published
     workflow_dispatch:
-        
+
 jobs:
     install-dependencies:
         runs-on: ubuntu-latest
@@ -67,7 +67,7 @@ jobs:
             - name: Deploy to Production
               run: |
                 echo "Deploying to production..."
-                curl -X POST ${{ secrets.PROD_DEPLOY_URL }}
+                # curl -X POST ${{ secrets.PROD_DEPLOY_URL }}
 
             - name: Notify Stakeholders
               run: echo "Production deployment finished."
