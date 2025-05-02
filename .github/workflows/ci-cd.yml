@@ -7,6 +7,8 @@ on:
     release:
         types:
             - published
+    workflow_dispatch:
+        
 jobs:
     install-dependencies:
         runs-on: ubuntu-latest
