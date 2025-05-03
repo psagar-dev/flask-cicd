@@ -3,144 +3,33 @@ run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
     push:
         branches:
-          - staging
-    release:
-        types:
-            - published
+          - main
+
     workflow_dispatch:
 
 jobs:
-    install-dependencies:
+    deploy:
         runs-on: self-hosted
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
             
-            - name: Set up Python
-              uses: actions/setup-python@v5
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
               with:
-                python-version: '3.12'
-            
-            - name: Install dependencies
-              run: |
-                pip install --upgrade pip
-                pip install -r requirements.txt
-    
-    run-tests:
-        runs-on: self-hosted
-        needs: install-dependencies
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-            
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                python-version: '3.12'
-            
-            - name: Install dependencies
-              run: |
-                pip install --upgrade pip
-                pip install -r requirements.txt
-            
-            - name: Run tests
-              run: |
-                python -m pytest tests/
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                aws-region: ${{ secrets.AWS_REGION }}
 
-    deploy-staging:
-        runs-on: self-hosted
-        needs: run-tests
-        if: github.ref == 'refs/heads/staging'
-        steps:
-            - name: Deploy to Staging
+            - name: Log in to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Build, tag, and push Docker image to ECR
+              env:
+                ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+                ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+                IMAGE_TAG: latest
               run: |
-                echo "Deploying to staging..."
-
-            - name: Notify via Slack or Email (optional)
-              run: echo "Staging deployment finished."
-
-    deploy-production:
-        runs-on: self-hosted
-        needs: run-tests
-        if: github.event_name == 'release' && github.event.action == 'published'
-        steps:
-            - name: Deploy to Production
-              run: |
-                echo "Deploying to production..."
-    
-    notify-on-success:
-      runs-on: self-hosted
-      needs: [deploy-staging, deploy-production]
-      if: success()
-      steps:
-        - name: Send Slack Notification on Success
-          uses: slackapi/slack-github-action@v2.0.0
-          with:
-            payload: |
-              {
-                "text": "✅ *CI/CD Pipeline Succeeded!*",
-                "attachments": [
-                  {
-                    "color": "#2eb886",
-                    "fields": [
-                      {
-                        "title": "Repo",
-                        "value": "${{ github.repository }}",
-                        "short": true
-                      },
-                      {
-                        "title": "Branch",
-                        "value": "${{ github.ref_name }}",
-                        "short": true
-                      },
-                      {
-                        "title": "Commit",
-                        "value": "${{ github.sha }}",
-                        "short": false
-                      }
-                    ]
-                  }
-                ]
-              }
-            webhook-type: incoming-webhook
-          env:
-            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-    notify-on-failure:
-        runs-on: self-hosted
-        needs: [install-dependencies, run-tests, deploy-staging, deploy-production]
-        if: failure()
-        steps:
-          - name: Send Slack Notification on Failure
-            uses: slackapi/slack-github-action@v2.0.0
-            with:
-              payload: |
-                {
-                  "text": "❌ *CI/CD Pipeline Failed!*",
-                  "attachments": [
-                    {
-                      "color": "#ff0000",
-                      "fields": [
-                        {
-                          "title": "Repo",
-                          "value": "${{ github.repository }}",
-                          "short": true
-                        },
-                        {
-                          "title": "Branch",
-                          "value": "${{ github.ref_name }}",
-                          "short": true
-                        },
-                        {
-                          "title": "Commit",
-                          "value": "${{ github.sha }}",
-                          "short": false
-                        }
-                      ]
-                    }
-                  ]
-                }
-              webhook-type: incoming-webhook
-            env:
-              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
+                  docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

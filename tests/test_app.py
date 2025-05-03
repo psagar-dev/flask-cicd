@@ -4,4 +4,4 @@ def test_home_route():
     tester = app.test_client()
     response = tester.get('/')
     assert response.status_code == 200
-    assert b"Hello, Flask CI/CD!23" in response.data
+    assert b"Hello, Flask CI/CD!" in response.data

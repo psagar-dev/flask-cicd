@@ -1,0 +1,31 @@
+# Node modules (we will install inside container)
+node_modules
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local env files (never copy secrets!)
+.env
+.env.local
+
+# Docker files (optional)
+Dockerfile
+docker-compose.yml
+
+# Git files
+.git
+.gitignore
+
+# Others (optional: editors, system files)
+.vscode
+.idea
+*.swp
+*.swo
+*.sublime-project
+deploy
