@@ -13,13 +13,35 @@ jobs:
     install-dependencies:
         runs-on: self-hosted
         steps:
-            - uses: ./.github/actions/setup-python-env
+            - name: Checkout code
+              uses: actions/checkout@v4
+            
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: '3.12'
+            
+            - name: Install dependencies
+              run: |
+                pip install --upgrade pip
+                pip install -r requirements.txt
     
     run-tests:
         runs-on: self-hosted
         needs: install-dependencies
         steps:
-            - uses: ./.github/actions/setup-python-env
+            - name: Checkout code
+              uses: actions/checkout@v4
+            
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: '3.12'
+            
+            - name: Install dependencies
+              run: |
+                pip install --upgrade pip
+                pip install -r requirements.txt
             
             - name: Run tests
               run: |
