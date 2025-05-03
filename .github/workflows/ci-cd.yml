@@ -27,7 +27,7 @@ jobs:
                 pip install -r requirements.txt
     
     run-tests:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         needs: install-dependencies
         steps:
             - name: Checkout code
