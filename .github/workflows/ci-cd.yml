@@ -67,36 +67,80 @@ jobs:
             - name: Deploy to Production
               run: |
                 echo "Deploying to production..."
-
-            - name: Send Slack Notification
-              uses: slackapi/slack-github-action@v2.0.0
-              with:
-                payload: |
+    
+    notify-on-success:
+      runs-on: self-hosted
+      needs: [deploy-staging, deploy-production]
+      if: success()
+      steps:
+        - name: Send Slack Notification on Success
+          uses: slackapi/slack-github-action@v2.0.0
+          with:
+            payload: |
+              {
+                "text": "✅ *CI/CD Pipeline Succeeded!*",
+                "attachments": [
                   {
-                    "text": "🚀 Deployment to *Production* was successful!",
-                    "attachments": [
+                    "color": "#2eb886",
+                    "fields": [
                       {
-                        "color": "#36a64f",
-                        "fields": [
-                          {
-                            "title": "Repo",
-                            "value": "${{ github.repository }}",
-                            "short": true
-                          },
-                          {
-                            "title": "Branch",
-                            "value": "${{ github.ref_name }}",
-                            "short": true
-                          },
-                          {
-                            "title": "Commit",
-                            "value": "${{ github.sha }}",
-                            "short": false
-                          }
-                        ]
+                        "title": "Repo",
+                        "value": "${{ github.repository }}",
+                        "short": true
+                      },
+                      {
+                        "title": "Branch",
+                        "value": "${{ github.ref_name }}",
+                        "short": true
+                      },
+                      {
+                        "title": "Commit",
+                        "value": "${{ github.sha }}",
+                        "short": false
                       }
                     ]
                   }
-                webhook-type: incoming-webhook
-              env:
-                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+                ]
+              }
+            webhook-type: incoming-webhook
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    notify-on-failure:
+        runs-on: self-hosted
+        needs: [install-dependencies, run-tests, deploy-staging, deploy-production]
+        if: failure()
+        steps:
+          - name: Send Slack Notification on Failure
+            uses: slackapi/slack-github-action@v2.0.0
+            with:
+              payload: |
+                {
+                  "text": "❌ *CI/CD Pipeline Failed!*",
+                  "attachments": [
+                    {
+                      "color": "#ff0000",
+                      "fields": [
+                        {
+                          "title": "Repo",
+                          "value": "${{ github.repository }}",
+                          "short": true
+                        },
+                        {
+                          "title": "Branch",
+                          "value": "${{ github.ref_name }}",
+                          "short": true
+                        },
+                        {
+                          "title": "Commit",
+                          "value": "${{ github.sha }}",
+                          "short": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              webhook-type: incoming-webhook
+            env:
+              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
