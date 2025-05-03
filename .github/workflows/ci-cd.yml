@@ -11,7 +11,7 @@ on:
 
 jobs:
     install-dependencies:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -48,7 +48,7 @@ jobs:
                 python -m pytest tests/
 
     deploy-staging:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         needs: run-tests
         if: github.ref == 'refs/heads/staging'
         steps:
@@ -60,7 +60,7 @@ jobs:
               run: echo "Staging deployment finished."
 
     deploy-production:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         needs: run-tests
         if: github.event_name == 'release' && github.event.action == 'published'
         steps:
