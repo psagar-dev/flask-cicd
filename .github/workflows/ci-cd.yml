@@ -58,7 +58,7 @@ jobs:
 
             - name: Notify via Slack or Email (optional)
               run: echo "Staging deployment finished."
-              
+
     deploy-production:
         runs-on: ubuntu-latest
         needs: run-tests
@@ -67,7 +67,12 @@ jobs:
             - name: Deploy to Production
               run: |
                 echo "Deploying to production..."
-                # curl -X POST ${{ secrets.PROD_DEPLOY_URL }}
 
-            - name: Notify Stakeholders
-              run: echo "Production deployment finished."
+            - name: Send custom event details to a Slack workflow
+              uses: slackapi/slack-github-action@v2.0.0
+              with:
+                webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+                webhook-type: webhook-trigger
+                payload: |
+                  status: "${{ job.status }}"
+                  option: "false"
