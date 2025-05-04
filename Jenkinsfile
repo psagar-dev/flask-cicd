@@ -35,5 +35,27 @@ pipeline {
                 """
             }
         }
+        
+        stage('Build Docker Image') {
+            steps {
+                sh "docker image build -t ${DOCKER_IMAGE_NAME} ."
+            }
+        }
+
+        stage("Stop & Remove Old Container") {
+            steps {
+                sh """
+                    if docker ps -a --format '{{.Names}}' | grep -Eq "^${DOCKER_CONTAINER_NAME}\$"; then
+                        docker container rm -f ${DOCKER_CONTAINER_NAME} || true
+                    fi
+                """
+            }
+        }
+
+        stage('deploying on stage envirement') {
+            steps {
+                sh "docker run -d -p 5000:5000 --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE_NAME}"
+            }
+        }
     }
 }
