@@ -16,7 +16,7 @@ def test_home_status_code(client):
 def test_home_content(client):
     """GET / should include our greeting."""
     response = client.get('/')
-    assert b"Hello, Flask!" in response.data
+    assert b"Hello, Flask!s" in response.data
 
 def test_404(client):
     """Unknown routes should return 404."""
