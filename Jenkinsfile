@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        VENV_DIR = 'venv'
-        PYTHON = "./${VENV_DIR}/bin/python"
-        PIP = "./${VENV_DIR}/bin/pip"
+        DOCKER_IMAGE = "securelooper/flask-app-demo"
+        CONTAINER_NAME = "flask-app-demo-container"
     }
 
     stages {
@@ -35,26 +34,44 @@ pipeline {
                 """
             }
         }
+
+        stage('Build Docker image') {
+            steps{
+                script{
+                    docker.build(DOCKER_IMAGE)
+                }
+            }
+        }
         
-        stage('Build Docker Image') {
-            steps {
-                sh "docker image build -t ${DOCKER_IMAGE_NAME} ."
+        stage('Docker Push') {
+            steps{
+                script{
+                    docker.withRegistry('', DOCKER_CREDENTIALS_ID){
+                        docker.image(DOCKER_IMAGE).push()
+                    }
+                }
             }
         }
 
-        stage("Stop & Remove Old Container") {
+        stage('Test') {
             steps {
-                sh """
-                    if docker ps -a --format '{{.Names}}' | grep -Eq "^${DOCKER_CONTAINER_NAME}\$"; then
-                        docker container rm -f ${DOCKER_CONTAINER_NAME} || true
-                    fi
-                """
-            }
-        }
-
-        stage('deploying on stage envirement') {
-            steps {
-                sh "docker run -d -p 5000:5000 --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE_NAME}"
+                 sshagent (credentials: ['ssh-ec2']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
+                        echo "Pulling latest Docker image"
+                        sudo docker pull ${DOCKER_IMAGE}
+                        
+                        echo "Stopping any existing container..."
+                        sudo docker stop ${CONTAINER_NAME} || true
+                        sudo docker rm ${CONTAINER_NAME} || true
+                        
+                        echo "Running the container..."
+                        sudo docker run -d --name ${CONTAINER_NAME} -p 80:5000 ${DOCKER_IMAGE}
+                        
+                        echo "Deployment successful!"
+                        '
+                    """
+                 }
             }
         }
     }
