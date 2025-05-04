@@ -8,16 +8,8 @@ pipeline {
     }
 
     stages {
-        // stage('Set up Virtualenv') {
-        //     steps {
-        //         sh """
-        //             python -m venv $VENV_DIR
-        //         """
-        //     }
-        // }
-
         stage('Install Dependencies') {
-            {
+            agent {
                 docker {
                     image 'python:3.12-slim'
                 }
@@ -28,13 +20,5 @@ pipeline {
                 """
             }
         }
-
-        // stage('Run Tests') {
-        //     steps {
-        //         sh """
-        //             $PYTHON -m pytest tests/
-        //         """
-        //     }
-        // }
     }
 }
