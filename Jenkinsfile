@@ -56,7 +56,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Deploy On Deploying') {
             steps {
                  sshagent (credentials: ['ssh-ec2']) {
                     sh """
