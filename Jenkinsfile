@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         VENV_DIR = 'venv'
-        PYTHON = "./venv/bin/python"
-        PIP = "./venv/bin/pip"
+        PYTHON = "./${VENV_DIR}/bin/python"
+        PIP = "./${VENV_DIR}/bin/pip"
     }
 
     stages {
@@ -16,7 +16,9 @@ pipeline {
             }
             steps {
                 sh """
-                    python install -r requirements.txt
+                    python3 -m venv ${VENV_DIR}
+                    ${PIP} install --upgrade pip
+                    ${PIP} install -r requirements.txt
                 """
             }
         }
