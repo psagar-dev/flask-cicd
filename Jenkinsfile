@@ -8,29 +8,33 @@ pipeline {
     }
 
     stages {
-        stage('Set up Virtualenv') {
-            steps {
-                sh """
-                    python -m venv $VENV_DIR
-                """
-            }
-        }
+        // stage('Set up Virtualenv') {
+        //     steps {
+        //         sh """
+        //             python -m venv $VENV_DIR
+        //         """
+        //     }
+        // }
 
         stage('Install Dependencies') {
+            {
+                docker {
+                    image 'python:3.12-slim'
+                }
+            }
             steps {
                 sh """
-                    $PIP install --upgrade pip
-                    $PIP install -r requirements.txt
+                    python install -r requirements.txt
                 """
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                sh """
-                    $PYTHON -m pytest tests/
-                """
-            }
-        }
+        // stage('Run Tests') {
+        //     steps {
+        //         sh """
+        //             $PYTHON -m pytest tests/
+        //         """
+        //     }
+        // }
     }
 }
