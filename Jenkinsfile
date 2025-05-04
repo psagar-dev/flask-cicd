@@ -5,12 +5,12 @@ pipeline {
         stage('Build') {
             steps {
                 sh """
-                    python -m pip install --upgrade pip'
+                    python3 -m pip install --upgrade pip'
                     pip install -r requirements.txt
                 """
             }
         }
-        
+
         stage('Test') {
             steps {
                 echo 'Testing python...'
