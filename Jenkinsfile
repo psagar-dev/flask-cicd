@@ -4,6 +4,9 @@ pipeline {
     environment {
         DOCKER_IMAGE = "securelooper/flask-app-demo"
         CONTAINER_NAME = "flask-app-demo-container"
+        VENV_DIR = 'venv'
+        PYTHON = "./${VENV_DIR}/bin/python"
+        PIP = "./${VENV_DIR}/bin/pip"
     }
 
     stages {
