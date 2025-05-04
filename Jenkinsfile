@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Cloning code...'
-                sh 'https://github.com/psagar-dev/flask-cicd.git'
+                git 'https://github.com/psagar-dev/flask-cicd.git'
             }
         }
     }
