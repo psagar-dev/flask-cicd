@@ -79,4 +79,24 @@ pipeline {
             }
         }
     }
+
+    post {
+        success {
+            emailext (
+                subject: "✅ SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: "Build succeeded!\n\nCheck console output: ${env.BUILD_URL}",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+                to: "${RECIPIENTS}"
+            )
+        }
+
+        failure {
+            emailext (
+                subject: "❌ FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: "Build failed!\n\nCheck console output: ${env.BUILD_URL}",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+                to: "${RECIPIENTS}"
+            )
+        }
+    }
 }
