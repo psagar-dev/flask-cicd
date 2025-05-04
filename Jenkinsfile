@@ -10,7 +10,7 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
+        stage('Python Dependency Install') {
             agent {
                 docker {
                     image 'python:3.12-slim'
@@ -25,7 +25,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Unit Test') {
             agent {
                 docker {
                     image 'python:3.12-slim'
@@ -33,48 +33,48 @@ pipeline {
             }
             steps {
                 sh """
-                    $PYTHON -m pytest tests/
+                    ${PYTHON} -m pytest tests/
                 """
             }
         }
 
-        stage('Build Docker image') {
-            steps{
-                script{
-                    docker.build(DOCKER_IMAGE)
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build(env.DOCKER_IMAGE)
                 }
             }
         }
-        
-        stage('Docker Push') {
-            steps{
-                script{
-                    docker.withRegistry('', DOCKER_CREDENTIALS_ID){
-                        docker.image(DOCKER_IMAGE).push()
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('', env.DOCKER_CREDENTIALS_ID) {
+                        docker.image(env.DOCKER_IMAGE).push()
                     }
                 }
             }
         }
 
-        stage('Deploy On Deploying') {
+        stage('Deploy to EC2') {
             steps {
-                 sshagent (credentials: ['ssh-ec2']) {
+                sshagent (credentials: ['ssh-ec2']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
                         echo "Pulling latest Docker image"
                         sudo docker pull ${DOCKER_IMAGE}
-                        
-                        echo "Stopping any existing container..."
+
+                        echo "Stopping existing container"
                         sudo docker stop ${CONTAINER_NAME} || true
                         sudo docker rm ${CONTAINER_NAME} || true
-                        
-                        echo "Running the container..."
+
+                        echo "Starting new container"
                         sudo docker run -d --name ${CONTAINER_NAME} -p 80:5000 ${DOCKER_IMAGE}
-                        
-                        echo "Deployment successful!"
+
+                        echo "✅ Deployment successful"
                         '
                     """
-                 }
+                }
             }
         }
     }
