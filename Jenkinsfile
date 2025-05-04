@@ -1,8 +1,8 @@
 pipeline {
     agent any
-    
+
     tools {
-        python 'Python3'        // name in Global Tool Config
+        python 'python3'        // name in Global Tool Config
     }
 
     stages {
