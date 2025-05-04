@@ -8,7 +8,7 @@ pipeline {
     }
 
     stages {
-        stage('Install Dependencies') {
+        stage('Build') {
             agent {
                 docker {
                     image 'python:3.12-slim'
@@ -19,6 +19,19 @@ pipeline {
                     python3 -m venv ${VENV_DIR}
                     ${PIP} install --upgrade pip
                     ${PIP} install -r requirements.txt
+                """
+            }
+        }
+
+        stage('Test') {
+            agent {
+                docker {
+                    image 'python:3.12-slim'
+                }
+            }
+            steps {
+                sh """
+                    $PYTHON -m pytest tests/
                 """
             }
         }
