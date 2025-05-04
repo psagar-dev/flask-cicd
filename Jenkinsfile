@@ -80,20 +80,20 @@ pipeline {
         // }
     }
 
-    post {
-        // success {
-        //     emailext (
-        //         subject: "✅ SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}",
-        //         body: "Build passed!\n\nDetails: ${env.BUILD_URL}",
-        //         to: "${RECIPIENTS}"
-        //     )
-        // }
-        failure {
-            emailext (
-                subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Build failed!\n\nCheck console: ${env.BUILD_URL}",
-                to: "${RECIPIENTS}"
-            )
-        }
-    }
+    // post {
+    //     // success {
+    //     //     emailext (
+    //     //         subject: "✅ SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}",
+    //     //         body: "Build passed!\n\nDetails: ${env.BUILD_URL}",
+    //     //         to: "${RECIPIENTS}"
+    //     //     )
+    //     // }
+    //     failure {
+    //         emailext (
+    //             subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+    //             body: "Build failed!\n\nCheck console: ${env.BUILD_URL}",
+    //             to: "${RECIPIENTS}"
+    //         )
+    //     }
+    // }
 }
