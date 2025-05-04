@@ -7,6 +7,7 @@ pipeline {
         VENV_DIR = 'venv'
         PYTHON = "./${VENV_DIR}/bin/python"
         PIP = "./${VENV_DIR}/bin/pip"
+        DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
     }
 
     stages {
@@ -49,7 +50,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
+                    docker.withRegistry('', env.DOCKER_CREDENTIALS_ID) {
                         docker.image(DOCKER_IMAGE).push()
                     }
                 }
