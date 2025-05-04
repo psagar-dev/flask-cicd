@@ -1,11 +1,15 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.12-slim'
+        }
+    }
 
     stages {
         stage('Build') {
             steps {
                 sh """
-                    python3 -m pip install --upgrade pip
+                    python -m pip install --upgrade pip
                     pip install -r requirements.txt
                 """
             }
@@ -14,7 +18,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing python...'
-                sh 'python3 -m pytest tests/'
+                sh 'python -m pytest tests/'
             }
         }
     }
