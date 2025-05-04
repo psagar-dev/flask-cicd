@@ -5,14 +5,19 @@ pipeline {
         }
     }
 
+    environment {
+        VENV_PATH = "./venv"
+        PYTHON_BIN = "./venv/bin/python"
+        PIP_BIN = "./venv/bin/pip"
+    }
+
     stages {
         stage('Build') {
             steps {
                 sh """
-                    python -m venv venv
-                    . venv/bin/activate
-                    python -m pip install --upgrade pip
-                    pip install -r requirements.txt
+                    python -m venv $VENV_PATH
+                    $PIP_BIN install --upgrade pip
+                    $PIP_BIN install -r requirements.txt
                 """
             }
         }
@@ -20,8 +25,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing python...'
-                sh '. venv/bin/activate'
-                sh 'python -m pytest tests/'
+                sh '$PYTHON_BIN -m pytest tests/'
             }
         }
     }
