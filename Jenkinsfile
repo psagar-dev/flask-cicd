@@ -6,26 +6,34 @@ pipeline {
     }
 
     environment {
-        VENV_PATH = "./venv"
-        PYTHON_BIN = "./venv/bin/python"
-        PIP_BIN = "./venv/bin/pip"
+        VENV_DIR = 'venv'
+        PYTHON = "./venv/bin/python"
+        PIP = "./venv/bin/pip"
     }
 
     stages {
-        stage('Build') {
+        stage('Set up Virtualenv') {
             steps {
                 sh """
-                    python -m venv $VENV_PATH
-                    $PIP_BIN install --upgrade pip
-                    $PIP_BIN install -r requirements.txt
+                    python -m venv $VENV_DIR
                 """
             }
         }
 
-        stage('Test') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Testing python...'
-                sh '$PYTHON_BIN -m pytest tests/'
+                sh """
+                    $PIP install --upgrade pip
+                    $PIP install -r requirements.txt
+                """
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh """
+                    $PYTHON -m pytest tests/
+                """
             }
         }
     }
