@@ -9,6 +9,8 @@ pipeline {
         stage('Build') {
             steps {
                 sh """
+                    python -m venv venv
+                    . venv/bin/activate
                     python -m pip install --upgrade pip
                     pip install -r requirements.txt
                 """
@@ -18,6 +20,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing python...'
+                sh '. venv/bin/activate'
                 sh 'python -m pytest tests/'
             }
         }
