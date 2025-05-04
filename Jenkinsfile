@@ -41,7 +41,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(env.DOCKER_IMAGE)
+                    docker.build(DOCKER_IMAGE)
                 }
             }
         }
@@ -49,8 +49,8 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('', env.DOCKER_CREDENTIALS_ID) {
-                        docker.image(env.DOCKER_IMAGE).push()
+                    docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
+                        docker.image(DOCKER_IMAGE).push()
                     }
                 }
             }
