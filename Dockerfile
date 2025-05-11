@@ -1,19 +1,23 @@
-# Dockerfile
-FROM python:3.12-slim
+FROM python:3.13-slim AS builder
 
-# Set working dir
 WORKDIR /app
 
-# Install dependencies
 COPY requirements.txt .
-RUN python -m pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+RUN pip install --upgrade pip && \
+    pip install --prefix=/install -r requirements.txt
+
 COPY . .
 
-# Expose Flask’s default port
+FROM python:3.13-alpine
+
+RUN apk add --no-cache libgcc libstdc++ musl
+
+WORKDIR /app
+
+COPY --from=builder /install /usr/local
+COPY --from=builder /app /app
+
 EXPOSE 5000
 
-# Run with Gunicorn for production
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
