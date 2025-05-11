@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "securelooper/flask-app-demo"
-        CONTAINER_NAME = "flask-app-demo-container"
+        DOCKER_IMAGE = "securelooper/flask-cicd"
+        CONTAINER_NAME = "flask-cicd-container"
         VENV_DIR = 'venv'
         PYTHON = "./${VENV_DIR}/bin/python"
         PIP = "./${VENV_DIR}/bin/pip"
@@ -14,7 +14,7 @@ pipeline {
         stage('Python Dependency Install') {
             agent {
                 docker {
-                    image 'python:3.12-slim'
+                    image 'python:3.13-slim'
                 }
             }
             steps {
@@ -29,7 +29,7 @@ pipeline {
         stage('Unit Test') {
             agent {
                 docker {
-                    image 'python:3.12-slim'
+                    image 'python:3.13-slim'
                 }
             }
             steps {
@@ -45,55 +45,6 @@ pipeline {
                     docker.build(DOCKER_IMAGE)
                 }
             }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('', env.DOCKER_CREDENTIALS_ID) {
-                        docker.image(DOCKER_IMAGE).push()
-                    }
-                }
-            }
-        }
-
-        stage('Deploy to EC2') {
-            steps {
-                sshagent (credentials: ['ssh-ec2']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
-                        echo "Pulling latest Docker image"
-                        sudo docker pull ${DOCKER_IMAGE}
-
-                        echo "Stopping existing container"
-                        sudo docker stop ${CONTAINER_NAME} || true
-                        sudo docker rm ${CONTAINER_NAME} || true
-
-                        echo "Starting new container"
-                        sudo docker run -d --name ${CONTAINER_NAME} -p 80:5000 ${DOCKER_IMAGE}
-
-                        echo "✅ Deployment successful"
-                        '
-                    """
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            emailext (
-                subject: "✅ SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}",
-                body: "Build passed!\n\nDetails: ${env.BUILD_URL}",
-                to: "${RECIPIENTS}"
-            )
-        }
-        failure {
-            emailext (
-                subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Build failed!\n\nCheck console: ${env.BUILD_URL}",
-                to: "${RECIPIENTS}"
-            )
-        }
+        }   
     }
 }
