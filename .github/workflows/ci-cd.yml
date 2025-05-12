@@ -1,0 +1,178 @@
+name: CI/CD Pipeline for Flask App
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on:
+    push:
+        branches:
+          - main
+          
+    workflow_dispatch:
+
+jobs:
+    install-dependencies:
+      runs-on: ubuntu-latest
+      steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+          
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.12'
+          
+          - name: Install dependencies
+            run: |
+              pip install --upgrade pip
+              pip install -r requirements.txt
+    security-check:
+        runs-on: ubuntu-latest
+        needs: install-dependencies
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            
+            - name: Trivy Installation
+              run: |
+                sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+                wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+                echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+                sudo apt-get update -y
+                sudo apt-get install -y trivy
+
+            - name: Trivy FS Scan
+              run: trivy fs --format table -o fs-report.json .
+
+            - name: Gitleaks Installation
+              run: sudo apt install gitleaks -y
+
+            - name: Gitleaks Code Scan
+              run: gitleaks detect source . -r gitleaks-report.json -f json
+
+    run-tests:
+        runs-on: ubuntu-latest
+        needs: security-check
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: '3.12'
+            
+            - name: Install dependencies
+              run: |
+                pip install --upgrade pip
+                pip install -r requirements.txt
+            
+            - name: Run tests
+              run: |
+                python -m pytest tests/
+
+    notify-on-success:
+      runs-on: ubuntu-latest
+      needs: [run-tests]
+      if: success()
+      steps:
+        - name: Send Slack Notification on Success
+          uses: slackapi/slack-github-action@v2.0.0
+          with:
+            payload: |
+              {
+                "text": "✅ *CI/CD Pipeline Succeeded!*",
+                "attachments": [
+                  {
+                    "color": "#2eb886",
+                    "fields": [
+                      {
+                        "title": "Repo",
+                        "value": "${{ github.repository }}",
+                        "short": true
+                      },
+                      {
+                        "title": "Branch",
+                        "value": "${{ github.ref_name }}",
+                        "short": true
+                      },
+                      {
+                        "title": "Commit",
+                        "value": "${{ github.sha }}",
+                        "short": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            webhook-type: incoming-webhook
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    notify-on-failure:
+        runs-on: self-hosted
+        needs: [install-dependencies, run-tests]
+        if: failure()
+        steps:
+          - name: Send Slack Notification on Failure
+            uses: slackapi/slack-github-action@v2.0.0
+            with:
+              payload: |
+                {
+                  "text": "❌ *CI/CD Pipeline Failed!*",
+                  "attachments": [
+                    {
+                      "color": "#ff0000",
+                      "fields": [
+                        {
+                          "title": "Repo",
+                          "value": "${{ github.repository }}",
+                          "short": true
+                        },
+                        {
+                          "title": "Branch",
+                          "value": "${{ github.ref_name }}",
+                          "short": true
+                        },
+                        {
+                          "title": "Commit",
+                          "value": "${{ github.sha }}",
+                          "short": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              webhook-type: incoming-webhook
+            env:
+              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    # deploy:
+    #     runs-on: self-hosted
+    #     steps:
+    #         - name: Checkout code
+    #           uses: actions/checkout@v4
+            
+    #         - name: Configure AWS credentials
+    #           uses: aws-actions/configure-aws-credentials@v4
+    #           with:
+    #             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #             aws-region: ${{ secrets.AWS_REGION }}
+
+    #         - name: Log in to Amazon ECR
+    #           id: login-ecr
+    #           uses: aws-actions/amazon-ecr-login@v2
+
+    #         - name: Build, tag, and push Docker image to ECR
+    #           env:
+    #             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #             ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+    #             IMAGE_TAG: latest
+    #           run: |
+    #               docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+    #               docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            
+    #         - name: Update ECS service
+    #           run: |
+    #             aws ecs update-service \
+    #               --cluster ${{ secrets.ECS_CLUSTER }} \
+    #               --service ${{ secrets.ECS_SERVICE }} \
+    #               --force-new-deployment
