@@ -106,24 +106,41 @@ jobs:
               echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
               chmod 600 ~/.ssh/id_ed25519
               ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
-          - name: SSH and Deploy
-            run: |
-              ssh -i ~/.ssh/id_ed25519 ubuntu@${{ secrets.SSH_HOST }} << EOF
+          
+          - name: Deploy to remote server via SSH
+            uses: appleboy/ssh-action@v1
+            with:
+              host: ${{ secrets.SSH_HOST }}
+              username: ubuntu
+              key: ${{ secrets.SSH_PRIVATE_KEY }}
+              port: 22
+              script: |
                 set -e
+
+                if ! command -v aws &> /dev/null; then
+                  echo "Installing AWS CLI..."
+                  sudo apt update
+                  sudo apt install unzip curl -y
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  unzip -o awscliv2.zip
+                  sudo ./aws/install
+                  export PATH=$PATH:/usr/local/bin
+                fi
+
                 echo "🔐 Logging into ECR..."
-                aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+                aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
 
-                echo "📦 Pulling Image"
-                docker pull ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
+                IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:staging-${{ github.run_number }}
 
-                echo "🧹 Cleaning Up Old Container"
+                echo "📦 Pulling Image: $IMAGE_URI"
+                docker pull $IMAGE_URI
+
+                echo "🧹 Removing old container"
                 docker rm -f python-cicd-container || true
 
-                echo "🚀 Running New Container"
-                docker run -d --name python-cicd-container -p 80:5000 ${{ steps.login-ecr.outputs.registry }}/sagar/ci-cd:$IMAGE_TAG
-              EOF
-              
+                echo "🚀 Running new container"
+                docker run -d --name python-cicd-container -p 80:5000 $IMAGE_URI
+
     deploy-production:
         runs-on: self-hosted
         needs: run-tests
