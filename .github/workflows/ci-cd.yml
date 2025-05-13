@@ -136,13 +136,6 @@ jobs:
                   --service $ECS_SERVICE \
                   --task-definition $TASK_DEF_ARN \
                   --force-new-deployment
-                
-                - name: Update ECS service
-                  run: |
-                    aws ecs update-service \
-                      --cluster ${{ secrets.ECS_CLUSTER }} \
-                      --service ${{ secrets.ECS_SERVICE }} \
-                      --force-new-deployment
 
     notify-on-success:
       runs-on: ubuntu-latest
