@@ -30,7 +30,7 @@ pipeline {
         stage("Security Scans") {
             parallel {
                 stage('Trivy Vulnerability Scan') {
-                    step {
+                    steps {
                         sh '''
                             docker run --rm \
                             -v $PWD:/project \
@@ -40,7 +40,7 @@ pipeline {
                     }
                 }
                 stage("Gitleaks Secret Scan") {
-                    step {
+                    steps {
                         sh '''
                             docker run --rm \
                             -v $PWD:/repo \
