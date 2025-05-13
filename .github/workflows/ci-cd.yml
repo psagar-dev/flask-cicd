@@ -71,6 +71,10 @@ jobs:
     deploy:
         runs-on: ubuntu-latest
         needs: run-tests
+        env:
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.run_number }}
+
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -89,18 +93,56 @@ jobs:
             - name: Build, tag, and push Docker image to ECR
               env:
                 ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-                ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-                IMAGE_TAG: ${{ github.run_number }}
               run: |
                   docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
                   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            
+            - name: Fetch Current Task Definition
+              run: |
+                aws ecs describe-task-definition \
+                  --task-definition python-cicd \
+                  --query "taskDefinition" > task-def.json
 
-    #         - name: Update ECS service
-    #           run: |
-    #             aws ecs update-service \
-    #               --cluster ${{ secrets.ECS_CLUSTER }} \
-    #               --service ${{ secrets.ECS_SERVICE }} \
-    #               --force-new-deployment
+            - name: Update Image in Task Definition
+              id: update-task
+              run: |
+                IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+                jq --arg IMAGE "$IMAGE_URI" '
+                  del(
+                    .taskDefinitionArn,
+                    .revision,
+                    .status,
+                    .requiresAttributes,
+                    .compatibilities,
+                    .registeredAt,
+                    .registeredBy
+                  )
+                  | .containerDefinitions[0].image = $IMAGE
+                ' task-def.json > new-task-def.json
+
+            - name: Register New Task Definition Revision
+              id: register-task
+              run: |
+                TASK_DEF_ARN=$(aws ecs register-task-definition \
+                  --cli-input-json file://new-task-def.json \
+                  --query "taskDefinition.taskDefinitionArn" \
+                  --output text)
+                echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+
+            - name: Deploy to ECS
+              run: |
+                aws ecs update-service \
+                  --cluster $ECS_CLUSTER \
+                  --service $ECS_SERVICE \
+                  --task-definition $TASK_DEF_ARN \
+                  --force-new-deployment
+                
+                - name: Update ECS service
+                  run: |
+                    aws ecs update-service \
+                      --cluster ${{ secrets.ECS_CLUSTER }} \
+                      --service ${{ secrets.ECS_SERVICE }} \
+                      --force-new-deployment
 
     notify-on-success:
       runs-on: ubuntu-latest
