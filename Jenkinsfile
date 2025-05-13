@@ -26,31 +26,18 @@ pipeline {
             }
         }
 
-        // stage("Trivy Vulnerability Scan") {
-        //     agent {
-        //         docker {
-        //             image 'aquasec/trivy:latest'
-        //         }
-        //     }
-        //     steps {
-        //         sh 'trivy fs . --exit-code 1 --severity HIGH,CRITICAL . || true'
-        //     }
-        // }
+        stage("Trivy Vulnerability Scan") {
+            steps {
+                sh '''
+                    docker run --rm \
+                    -v $PWD:/project \
+                    aquasec/trivy:latest fs /project \
+                    --exit-code 1 --severity HIGH,CRITICAL || true
+                '''
+            }
+        }
 
         stage("Gitleaks Secret Scan") {
-            // agent {
-            //     docker {
-            //         image 'zricethezav/gitleaks:latest'
-            //         args '--entrypoint=sh'
-            //     }
-            // }
-
-            // steps {
-            //     sh """
-            //         gitleaks detect --source=. --verbose --redact --exit-code 1 || true
-            //     """
-            // }
-
             steps {
                 sh '''
                     docker run --rm \
