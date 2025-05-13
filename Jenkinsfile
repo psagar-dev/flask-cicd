@@ -30,20 +30,24 @@ pipeline {
         stage("Security Scans") {
             parallel {
                 stage('Trivy Vulnerability Scan') {
-                    sh '''
-                        docker run --rm \
-                        -v $PWD:/project \
-                        aquasec/trivy:latest fs /project \
-                        --exit-code 1 --severity HIGH,CRITICAL || true
-                    '''
+                    step {
+                        sh '''
+                            docker run --rm \
+                            -v $PWD:/project \
+                            aquasec/trivy:latest fs /project \
+                            --exit-code 1 --severity HIGH,CRITICAL || true
+                        '''
+                    }
                 }
                 stage("Gitleaks Secret Scan") {
-                    sh '''
-                        docker run --rm \
-                        -v $PWD:/repo \
-                        zricethezav/gitleaks:latest detect \
-                        --source=/repo --verbose --redact --exit-code 1 || true
-                    '''
+                    step {
+                        sh '''
+                            docker run --rm \
+                            -v $PWD:/repo \
+                            zricethezav/gitleaks:latest detect \
+                            --source=/repo --verbose --redact --exit-code 1 || true
+                        '''
+                    }
                 }
             }
         }
