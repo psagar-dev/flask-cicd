@@ -100,7 +100,7 @@ jobs:
             - name: Fetch Current Task Definition
               run: |
                 aws ecs describe-task-definition \
-                  --task-definition ${{ secrets.ECS_TASK_DEFINITION }}python-cicd \
+                  --task-definition ${{ secrets.ECS_TASK_DEFINITION }} \
                   --query "taskDefinition" > task-def.json
 
             - name: Update Image in Task Definition
