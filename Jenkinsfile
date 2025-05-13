@@ -38,17 +38,26 @@ pipeline {
         // }
 
         stage("Gitleaks Secret Scan") {
-            agent {
-                docker {
-                    image 'zricethezav/gitleaks:latest'
-                    args '--entrypoint=sh'
-                }
-            }
+            // agent {
+            //     docker {
+            //         image 'zricethezav/gitleaks:latest'
+            //         args '--entrypoint=sh'
+            //     }
+            // }
+
+            // steps {
+            //     sh """
+            //         gitleaks detect --source=. --verbose --redact --exit-code 1 || true
+            //     """
+            // }
 
             steps {
-                sh """
-                    gitleaks detect --source=. --verbose --redact --exit-code 1 || true
-                """
+                sh '''
+                    docker run --rm \
+                    -v $PWD:/repo \
+                    zricethezav/gitleaks:latest detect \
+                    --source=/repo --verbose --redact --exit-code 1 || true
+                '''
             }
         }
 
