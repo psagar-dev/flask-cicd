@@ -211,17 +211,11 @@ jobs:
                   --service ${{ secrets.ECS_SERVICE }} \
                   --task-definition $TASK_DEF_ARN \
                   --force-new-deployment
-
+                  
     notify-on-success:
       runs-on: self-hosted
-      needs: [install-dependencies,security-check, run-tests, deploy-production,deploy-staging]
-      if: |
-        always() &&
-        needs.install-dependencies.result == 'success' &&
-        needs.security-check.result == 'success' &&
-        needs.run-tests.result == 'success' &&
-        needs.deploy-production.result == 'success' &&
-        needs.deploy-staging.result == 'success'
+      needs: [install-dependencies,security-check, run-tests, deploy-production, deploy-staging]
+      if: success()
       steps:
         - name: Send Slack Notification on Success
           uses: slackapi/slack-github-action@v2.0.0
@@ -293,5 +287,3 @@ jobs:
               webhook-type: incoming-webhook
             env:
               SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-    

@@ -42,27 +42,28 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(DOCKER_IMAGE)
+                    def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    docker.build(IMAGE_NAME_TAG)
                 }
             }
         }   
     }
 
-    post {
-        success {
-            emailext (
-                subject: "✅ SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}",
-                body: "Build passed!\n\nDetails: ${env.BUILD_URL}",
-                to: "${RECIPIENTS}"
-            )
-        }
+    // post {
+    //     success {
+    //         emailext (
+    //             subject: "✅ SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}",
+    //             body: "Build passed!\n\nDetails: ${env.BUILD_URL}",
+    //             to: "${RECIPIENTS}"
+    //         )
+    //     }
         
-        failure {
-            emailext (
-                subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Build failed!\n\nCheck console: ${env.BUILD_URL}",
-                to: "${RECIPIENTS}"
-            )
-        }
-    }
+    //     failure {
+    //         emailext (
+    //             subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+    //             body: "Build failed!\n\nCheck console: ${env.BUILD_URL}",
+    //             to: "${RECIPIENTS}"
+    //         )
+    //     }
+    // }
 }
