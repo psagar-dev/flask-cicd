@@ -27,7 +27,9 @@ pipeline {
 
         stage("Security Scans") {
             steps {
-                securityScanSteps()
+                script {
+                    securityScanSteps()
+                }
             }
         }
         
