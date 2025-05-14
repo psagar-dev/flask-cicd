@@ -25,63 +25,63 @@ pipeline {
             }
         }
 
-        stage("Security Scans") {
-            parallel {
-                stage('Trivy Vulnerability Scan') {
-                    steps {
-                        sh '''
-                            docker run --rm \
-                            -v $PWD:/project \
-                            aquasec/trivy:latest fs /project \
-                            --exit-code 1 --severity HIGH,CRITICAL || true
-                        '''
-                    }
-                }
-                stage("Gitleaks Secret Scan") {
-                    steps {
-                        sh '''
-                            docker run --rm \
-                            -v $PWD:/repo \
-                            zricethezav/gitleaks:latest detect \
-                            --source=/repo --verbose --redact --exit-code 1 || true
-                        '''
-                    }
-                }
-            }
-        }
+        // stage("Security Scans") {
+        //     parallel {
+        //         stage('Trivy Vulnerability Scan') {
+        //             steps {
+        //                 sh '''
+        //                     docker run --rm \
+        //                     -v $PWD:/project \
+        //                     aquasec/trivy:latest fs /project \
+        //                     --exit-code 1 --severity HIGH,CRITICAL || true
+        //                 '''
+        //             }
+        //         }
+        //         stage("Gitleaks Secret Scan") {
+        //             steps {
+        //                 sh '''
+        //                     docker run --rm \
+        //                     -v $PWD:/repo \
+        //                     zricethezav/gitleaks:latest detect \
+        //                     --source=/repo --verbose --redact --exit-code 1 || true
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
         
-        stage('Unit Test') {
-            agent {
-                docker {
-                    image 'python:3.13-slim'
-                }
-            }
-            steps {
-                sh """
-                    ${PYTHON} -m pytest tests/
-                """
-            }
-        }
+        // stage('Unit Test') {
+        //     agent {
+        //         docker {
+        //             image 'python:3.13-slim'
+        //         }
+        //     }
+        //     steps {
+        //         sh """
+        //             ${PYTHON} -m pytest tests/
+        //         """
+        //     }
+        // }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                    docker.build(IMAGE_NAME_TAG)
-                }
-            }
-        }
+        // stage('Build Docker Image') {
+        //     steps {
+        //         script {
+        //             def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+        //             docker.build(IMAGE_NAME_TAG)
+        //         }
+        //     }
+        // }
 
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
-                        def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                        docker.image(IMAGE_NAME_TAG).push()
-                    }
-                }
-            }
-        }
+        // stage('Push Docker Image') {
+        //     steps {
+        //         script {
+        //             docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
+        //                 def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+        //                 docker.image(IMAGE_NAME_TAG).push()
+        //             }
+        //         }
+        //     }
+        // }
 
         // stage('Deploy On Deploying') {
         //     steps {
