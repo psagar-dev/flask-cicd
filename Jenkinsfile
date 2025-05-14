@@ -52,7 +52,6 @@ pipeline {
             }
         }
         
-
         stage('Unit Test') {
             agent {
                 docker {
@@ -73,7 +72,18 @@ pipeline {
                     docker.build(IMAGE_NAME_TAG)
                 }
             }
-        }   
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
+                        def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                        docker.image(IMAGE_NAME_TAG).push()
+                    }
+                }
+            }
+        }
     }
 
     // post {
