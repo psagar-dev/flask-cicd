@@ -33,18 +33,16 @@ pipeline {
             }
         }
         
-        // stage('Unit Test') {
-        //     agent {
-        //         docker {
-        //             image 'python:3.13-slim'
-        //         }
-        //     }
-        //     steps {
-        //         sh """
-        //             ${PYTHON} -m pytest tests/
-        //         """
-        //     }
-        // }
+        stage('Unit Test') {
+            agent {
+                docker {
+                    image 'python:3.13-slim'
+                }
+            }
+            steps {
+                unitTest()
+            }
+        }
 
         // stage('Build Docker Image') {
         //     steps {
