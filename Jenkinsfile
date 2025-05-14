@@ -84,6 +84,29 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy On Deploying') {
+            steps {
+                 sshagent (credentials: ['ssh-ec2']) {
+                    def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
+                        echo "Pulling latest Docker image"
+                        sudo docker pull ${IMAGE_NAME_TAG}
+                        
+                        echo "Stopping any existing container..."
+                        sudo docker stop ${CONTAINER_NAME} || true
+                        sudo docker rm ${CONTAINER_NAME} || true
+                        
+                        echo "Running the container..."
+                        sudo docker run -d --name ${CONTAINER_NAME} -p 80:5000 ${IMAGE_NAME_TAG}
+                        
+                        echo "Deployment successful!"
+                        '
+                    """
+                 }
+            }
+        }
     }
 
     // post {
