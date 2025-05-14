@@ -67,7 +67,7 @@ pipeline {
                     script {
                         remoteDockerDeploy(
                             "${config.DOCKER_IMAGE}",
-                            "${config.CONTAINER_NAME}"
+                            "${config.CONTAINER_NAME}",
                             "80:5000",
                             "ssh-ec2"
                         )
