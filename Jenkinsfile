@@ -1,4 +1,5 @@
 @Library('Shared') _
+def config = securityConfig("securelooper/flask-cicd:${BUILD_NUMBER}")
 
 pipeline {
     agent any
@@ -44,14 +45,13 @@ pipeline {
             }
         }
 
-        // stage('Build Docker Image') {
-        //     steps {
-        //         script {
-        //             def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
-        //             docker.build(IMAGE_NAME_TAG)
-        //         }
-        //     }
-        // }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${config.DOCKER_IMAGE}")
+                }
+            }
+        }
 
         // stage('Push Docker Image') {
         //     steps {
