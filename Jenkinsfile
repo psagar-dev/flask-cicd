@@ -53,16 +53,13 @@ pipeline {
             }
         }
 
-        // stage('Push Docker Image') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
-        //                 def IMAGE_NAME_TAG = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
-        //                 docker.image(IMAGE_NAME_TAG).push()
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    pushDockerImage("${config.DOCKER_IMAGE}", "${config.DOCKER_CREDENTIALS_ID}")
+                }
+            }
+        }
 
         // stage('Deploy On Deploying') {
         //     steps {
