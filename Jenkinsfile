@@ -3,16 +3,7 @@ def config = securityConfig("securelooper/flask-cicd:${BUILD_NUMBER}",'flask-cic
 
 pipeline {
     agent any
-
-    environment {
-        DOCKER_IMAGE = "securelooper/flask-cicd"
-        CONTAINER_NAME = "flask-cicd-container"
-        VENV_DIR = 'venv'
-        PYTHON = "./${VENV_DIR}/bin/python"
-        PIP = "./${VENV_DIR}/bin/pip"
-        DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
-    }
-
+    
     stages {
         
         stage('Python Dependency Install') {
@@ -77,21 +68,17 @@ pipeline {
         }
     }
 
-    // post {
-    //     success {
-    //         emailext (
-    //             subject: "✅ SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}",
-    //             body: "Build passed!\n\nDetails: ${env.BUILD_URL}",
-    //             to: "${RECIPIENTS}"
-    //         )
-    //     }
+    post {
+        success {
+            script {
+                sendSuccessEmailNotification("${env.FLASK_EMAIL_RECIPIENTS}")
+            }
+        }
         
-    //     failure {
-    //         emailext (
-    //             subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-    //             body: "Build failed!\n\nCheck console: ${env.BUILD_URL}",
-    //             to: "${RECIPIENTS}"
-    //         )
-    //     }
-    // }
+        failure {
+           script {
+                sendFailureEmailNotification("${env.FLASK_EMAIL_RECIPIENTS}")
+            }
+        }
+    }
 }
