@@ -1,15 +1,16 @@
-# Install Jenkins on ubuntu
+# 🛠️ Jenkins Setup & Pipeline Guide
+
 You can [click here](https://github.com/psagar-dev/cheatsheet/blob/main/Jenkins/install.md) for more details on how to install Jenkins on Ubuntu.
 
+---
 
 ## 🔧 Install Docker Engine
 
 After opening the terminal, follow these steps:
 
-* Install Docker
-* Add your user to the Docker group
-* Add the Jenkins user to the Docker group
-
+- Install Docker
+- Add your user to the Docker group
+- Add the Jenkins user to the Docker group
 
 ```bash
 sudo curl -fsSL https://get.docker.com | sudo sh
@@ -58,6 +59,7 @@ Before proceeding with the pipeline setup or deployment process, ensure the foll
 ---
 
 ## 🛠️ Shared Library Setup
+
 To configure the global library in Jenkins:
 
 1. Navigate to your Jenkins **Dashboard**.
@@ -75,7 +77,7 @@ To configure the global library in Jenkins:
 | **Retrieval Method**        | `Modern SCM`                                                          |
 | **Source Code Management**  | `Git`                                                                 |
 | **Project Repository**      | `https://github.com/psagar-dev/jenkins-shared-libraries.git`          |
-| **Credentials**             | `psagar-dev/******` (Select your GitHub credentials if the repo is private) |
+| **Credentials**             | `psagar-dev/******` *(Select your GitHub credentials if the repo is private)* |
 
 Once the library is configured, you can load it in your `Jenkinsfile` using the following syntax:
 
@@ -91,7 +93,7 @@ This will enable you to use the shared functions and utilities defined in the li
 
 #### Jenkins Extended E-mail Notification Configuration
 
-This configuration enables Jenkins to send e-mails using Gmail SMTP.
+This configuration enables Jenkins to send emails using Gmail SMTP.
 
 1. Navigate to your Jenkins **Dashboard**.
 2. Click **Manage Jenkins**.
@@ -108,7 +110,7 @@ This configuration enables Jenkins to send e-mails using Gmail SMTP.
 | SMTP Server  | `smtp.gmail.com`    |
 | SMTP Port    | `587`               |
 
-## Advanced Settings
+### Advanced Settings
 
 - **Credentials**: Set to a Gmail-based user with an app-specific password or a valid credential ID in Jenkins.
 - **Use TLS**: ✅ *(Enabled)*
@@ -136,13 +138,13 @@ This document outlines the global environment variables configured in Jenkins.
 2. Click **Manage Jenkins**.
 3. Select **System**.
 4. Scroll down to **Global properties**.
-5. then click `Environment variables`:
+5. Then click **Environment variables**.
 
-#### ✅ Global Properties Configuration
+### ✅ Global Properties Configuration
 
 Environment variables are enabled globally.
 
-#### 📋 List of Environment Variables
+### 📋 List of Environment Variables
 
 | Name                    | Value               | Description                        |
 |-------------------------|---------------------|------------------------------------|
@@ -150,77 +152,55 @@ Environment variables are enabled globally.
 | `FLASK_CICD_EC2_USER`   | `ubuntu`            | Default SSH user for EC2 login     |
 | `FLASK_EMAIL_RECIPIENTS`| `xxxxxxx@gmail.com` | Email recipient for notifications  |
 
-## WebHook Cinfigration in github
+---
 
-### 🔧 Step-by-Step: How to Add a GitHub Webhook
+## 🔧 Webhook Configuration in GitHub
 
-#### ✅ 1. **Go to Your Repository**
+### ✅ Step-by-Step: How to Add a GitHub Webhook
 
-* Open your GitHub repository (e.g., `https://github.com/psagar-dev/flask-cicd`)
+1. **Go to Your Repository**
+   - Open your GitHub repository (e.g., `https://github.com/psagar-dev/flask-cicd`)
+2. **Navigate to Webhooks**
+   - Click on **Settings** (top bar)
+   - In the left sidebar, click **Webhooks**
+3. **Click “Add webhook”**
+   - Button is located at the top-right of the Webhooks section
+4. **Configure Webhook URL**
+   - In the **Payload URL** field, enter the URL of your server that will receive the webhook (e.g., your Jenkins server or custom endpoint):
+     ```
+     http://your-server-ip-or-domain/github-webhook/
+     ```
+5. **Set Content Type**
+   - Choose:
+     ```
+     application/json
+     ```
+6. **Select Events to Trigger**
+   - Choose:
+     - **Just the push event** *(common for CI/CD)*
+7. **Activate the Webhook**
+   - Make sure **"Active"** is checked
+   - Click the **"Add webhook"** button
+8. **Test the Webhook**
+   - Push a commit or perform the selected event
+   - Monitor the target server (Jenkins, etc.) or GitHub's webhook **Recent Deliveries** section
 
-#### ✅ 2. **Navigate to Webhooks**
-
-* Click on **Settings** (top bar)
-* In the left sidebar, click **Webhooks**
-
-#### ✅ 3. **Click “Add webhook”**
-
-* Button is located at the top-right of the Webhooks section
-
-#### ✅ 4. **Configure Webhook URL**
-
-* In the **Payload URL** field, enter the URL of your server that will receive the webhook (e.g., your Jenkins server or custom endpoint):
-
-  ```
-  http://your-server-ip-or-domain/github-webhook/
-  ```
-
-#### ✅ 5. **Set Content Type**
-
-* Choose:
-
-  ```
-  application/json
-  ```
-#### ✅ 6. **Select Events to Trigger**
-
-* Choose:
-
-  * **Just the push event** *(common for CI/CD)*
-
-#### ✅ 8. **Activate the Webhook**
-
-* Make sure **"Active"** is checked
-* Click the **"Add webhook"** button
-
-#### ✅ 9. **Test the Webhook**
-
-* Push a commit or perform the selected event
-* Monitor the target server (Jenkins, etc.) or GitHub's webhook **Recent Deliveries** section
-
-![github webhook](./images/jenkins/github-webhook.png)
+![GitHub Webhook](./images/jenkins/github-webhook.png)
 
 ---
 
 ## 🚀 Jenkins Pipeline Configuration for `flask-cicd`
 
-1. **Log in to Jenkins.**
-
+1. **Log in to Jenkins**
 2. **Click on “New Item”**
-
-   * This is usually located on the left-hand side of the Jenkins dashboard.
-
+   - This is usually located on the left-hand side of the Jenkins dashboard
 3. **Enter a name for your job**
-
-   * Example: `flask-cicd`
-
+   - Example: `flask-cicd`
 4. **Select “Pipeline” as the project type**
-
 5. **Click “OK”**
+   - This will take you to the configuration page for the new pipeline job
 
-   * This will take you to the configuration page for the new pipeline job.
-   
-#### 📁 Pipeline Definition
+### 📁 Pipeline Definition
 
 - **Definition**: Pipeline script from SCM
 - **SCM**: Git
@@ -229,11 +209,11 @@ Environment variables are enabled globally.
 - **Branch Specifier**: `main`
 - **Script Path**: `Jenkinsfile`
 
-## ⚡ Trigger
+### ⚡ Trigger
 
 - [x] GitHub hook trigger for GITScm polling 
 
-## 📝 Notes
+### 📝 Notes
 
 - This configuration uses a declarative pipeline stored in the `main` branch under the file `Jenkinsfile`.
 - Ensure that the **GitHub webhook** is properly configured in your GitHub repository settings to trigger Jenkins jobs automatically.
@@ -249,13 +229,10 @@ Environment variables are enabled globally.
 
 ```groovy
 @Library('Shared') _
-def config = securityConfig("securelooper/flask-cicd:${BUILD_NUMBER}",'flask-cicd-container')
-
+def config = securityConfig("securelooper/flask-cicd:${BUILD_NUMBER}", 'flask-cicd-container')
 pipeline {
     agent any
-    
     stages {
-        
         stage('Python Dependency Install') {
             agent {
                 docker {
@@ -266,7 +243,6 @@ pipeline {
                 installPythonDepsVm()
             }
         }
-
         stage("Security Scans") {
             steps {
                 script {
@@ -274,7 +250,6 @@ pipeline {
                 }
             }
         }
-        
         stage('Unit Test') {
             agent {
                 docker {
@@ -285,7 +260,6 @@ pipeline {
                 unitTest()
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 script {
@@ -293,7 +267,6 @@ pipeline {
                 }
             }
         }
-
         stage('Push Docker Image') {
             steps {
                 script {
@@ -301,7 +274,6 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy On Deploying') {
             steps {
                  sshagent (credentials: ['ssh-ec2']) {
@@ -317,14 +289,12 @@ pipeline {
             }
         }
     }
-
     post {
         success {
             script {
                 sendSuccessEmailNotification("${env.FLASK_EMAIL_RECIPIENTS}")
             }
         }
-        
         failure {
            script {
                 sendFailureEmailNotification("${env.FLASK_EMAIL_RECIPIENTS}")
@@ -334,7 +304,10 @@ pipeline {
 }
 ```
 
+---
+
 ### 🚀 Flask CI/CD Pipeline Summary
+
 #### 🔧 Key Components
 
 - **Shared Library**: `@Library('Shared')` — contains reusable functions
@@ -342,6 +315,7 @@ pipeline {
 - **Container Name**: `flask-cicd-container`
 - **Base Image**: `python:3.13-slim`
 - **Deployment Target**: Remote EC2 instance via SSH
+
 ---
 
 ### 📦 Pipeline Stages
@@ -363,7 +337,6 @@ pipeline {
 - ❌ **Failure**: Sends alert email on pipeline failure
 
 ![Success](./images/jenkins/success-mail.png)
-
 ![Fail](./images/jenkins/fail-mail-job.png)
 
 ---
@@ -375,5 +348,9 @@ pipeline {
 - Custom function: `remoteDockerDeploy(...)`
 
 ---
+
 ## 🚀 Pipeline Overview
+
 📷 ![Pipeline Overview](./images/jenkins/pipline-overview.png)
+
+![Deploy](./images/jenkins/deploy.png)
