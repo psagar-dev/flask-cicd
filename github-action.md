@@ -18,7 +18,7 @@ These environment variables are required for the deployment process. Replace the
 5. **Add the secret**:
 
    * **Name**: `AWS_ACCESS_KEY_ID`
-   * **Value**: `AKIAIOSFODNN7EXAMPLE`
+   * **Value**: `AKXXXXXXX7EXAMPLE`
    * Click **"Add secret"**
 
 You can add these variable
@@ -28,7 +28,7 @@ You can add these variable
 | Variable Name            | Sample Value                  |
 |--------------------------|-------------------------------|
 | `AWS_ACCESS_KEY_ID`      | AKIAIOSFODNN7EXAMPLE          |
-| `AWS_SECRET_ACCESS_KEY`  | wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY |
+| `AWS_SECRET_ACCESS_KEY`  | wJalrXXXXXXXX/K7MDENG/bPxRfiCYXXXXXXX |
 | `AWS_REGION`             | us-east-1                     |
 
 ##### 🚀 ECS Deployment
