@@ -129,6 +129,15 @@ Please add the following credentials in Jenkins:
 | System | (global) | ssh-ec2           | ubuntu         | SSH key to connect to EC2 instance – [How to add this](https://github.com/psagar-dev/cheatsheet/blob/main/Jenkins/credentials-ssh.md) |
 
 ---
+### EC2 install Create
+
+![EC2](./images/jenkins/ec2.png)
+
+Then cloudflare add domain
+
+![cloudflare Add Domain](./images/jenkins/adddomain-cloudflare.png)
+
+---
 
 ## 🌍 Jenkins Global Environment Variables
 
@@ -229,10 +238,13 @@ Environment variables are enabled globally.
 
 ```groovy
 @Library('Shared') _
-def config = securityConfig("securelooper/flask-cicd:${BUILD_NUMBER}", 'flask-cicd-container')
+def config = securityConfig("securelooper/flask-cicd:${BUILD_NUMBER}",'flask-cicd-container')
+
 pipeline {
     agent any
+    
     stages {
+        
         stage('Python Dependency Install') {
             agent {
                 docker {
@@ -243,6 +255,7 @@ pipeline {
                 installPythonDepsVm()
             }
         }
+
         stage("Security Scans") {
             steps {
                 script {
@@ -250,6 +263,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Unit Test') {
             agent {
                 docker {
@@ -260,6 +274,7 @@ pipeline {
                 unitTest()
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -267,6 +282,7 @@ pipeline {
                 }
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -274,6 +290,7 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy On Deploying') {
             steps {
                  sshagent (credentials: ['ssh-ec2']) {
@@ -289,12 +306,14 @@ pipeline {
             }
         }
     }
+
     post {
         success {
             script {
                 sendSuccessEmailNotification("${env.FLASK_EMAIL_RECIPIENTS}")
             }
         }
+        
         failure {
            script {
                 sendFailureEmailNotification("${env.FLASK_EMAIL_RECIPIENTS}")
