@@ -42,12 +42,10 @@ You can [click here](https://github.com/psagar-dev/cheatsheet/blob/main/Jenkins/
 
 This guide covers:
 
-1. Provisioning an EC2 instance for a GitHub Actions runner
-2. Installing the runner & dependencies
-3. Connecting it to GitHub
-4. Deploying to a staging environment
+1. Provisioning an EC2 instance for a deployment
+2. Installing dependencies
 
-### 1️⃣ Launch EC2 for GitHub Actions Runner
+### 1️⃣ Launch EC2 for deployment
 ![Ec2](./images/ec2.png)
 
 ### 🔧 Install Docker Engine
