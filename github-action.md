@@ -27,7 +27,7 @@ You can add these variable
 
 | Variable Name            | Sample Value                  |
 |--------------------------|-------------------------------|
-| `AWS_ACCESS_KEY_ID`      | AKIAIOSFODNN7EXAMPLE          |
+| `AWS_ACCESS_KEY_ID`      | AKIAIOSXXXXXXXXXXXX          |
 | `AWS_SECRET_ACCESS_KEY`  | wJalrXXXXXXXX/K7MDENG/bPxRfiCYXXXXXXX |
 | `AWS_REGION`             | us-east-1                     |
 
