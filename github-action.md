@@ -1,5 +1,5 @@
 
-### 🚀 Flask CI/CD Pipeline: GitHub Actions → AWS ECS Fargate
+## 🚀 Flask CI/CD Pipeline: GitHub Actions → AWS ECS Fargate
 
 Automate the build, test, security scan, and deployment of your Flask app using **GitHub Actions**, **AWS ECR/ECS (Fargate)**, **Cloudflare DNS**, and **Slack** notifications.
 
