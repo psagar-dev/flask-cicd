@@ -172,7 +172,32 @@ jobs:
               run: |
                   docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
                   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-            
+
+            - name: Deploy to remote server via SSH
+              uses: appleboy/ssh-action@v1
+              with:
+                host: ${{ secrets.SSH_HOST }}
+                username: ubuntu
+                key: ${{ secrets.SSH_PRIVATE_KEY }}
+                port: 22
+                script: |
+                  export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+                  export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  export AWS_REGION=${{ secrets.AWS_REGION }}
+
+                  if ! command -v aws &> /dev/null; then
+                    echo "Installing AWS CLI..."
+                    sudo apt update
+                    sudo apt install unzip curl -y
+                    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                    unzip -o awscliv2.zip
+                    sudo ./aws/install
+                    export PATH=$PATH:/usr/local/bin
+                  fi
+
+                  echo "🔐 Logging into ECR..."
+                  aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+
             - name: Fetch Current Task Definition
               run: |
                 aws ecs describe-task-definition \
