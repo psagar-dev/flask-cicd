@@ -1,10 +1,56 @@
-# 🛠️ Jenkins Setup & Pipeline Guide
+## 🚀 **Jenkins CI/CD Pipeline for Flask App**
 
-You can [click here](https://github.com/psagar-dev/cheatsheet/blob/main/Jenkins/install.md) for more details on how to install Jenkins on Ubuntu.
+This setup uses **Jenkins** to automate the build, test, security scan, Dockerization, and deployment of a Flask application to a remote EC2 server, with notifications for each pipeline run.
+
+#### 🗂️ **High-Level Flow**
+
+1. **Code pushed to GitHub**
+2. **GitHub webhook** triggers Jenkins pipeline
+3. **Pipeline stages:**
+
+   * Install Python dependencies (in Docker)
+   * Security scans
+   * Unit testing
+   * Build Docker image
+   * Push image to Docker registry
+   * Deploy on remote EC2 server (via SSH & Docker)
+4. **Email notifications** sent for success/failure
+
+### 🏗️ **Architecture Diagram**
+
+![jenkins-architecture.png](/images/github/jenkins-architecture.png)
 
 ---
 
-## 🔧 Install Docker Engine
+### 🧩 **Core Components**
+
+* **Jenkins**: Orchestrates the CI/CD process.
+* **Docker**: Runs build, test, and deploy stages in isolated containers.
+* **Shared Library**: Reusable Groovy functions for pipeline tasks.
+* **GitHub**: Hosts application source code and triggers pipeline via webhook.
+* **EC2**: Hosts the production Flask app.
+* **Docker Hub**: Stores built images.
+* **Email**: Notifies about pipeline results.
+
+### 🛠️ Jenkins Setup & Pipeline Guide
+
+You can [click here](https://github.com/psagar-dev/cheatsheet/blob/main/Jenkins/install.md) for more details on how to install Jenkins on Ubuntu.
+
+#### 🛠️ EC2 Setup for Deployment
+
+##### 📍 Overview
+
+This guide covers:
+
+1. Provisioning an EC2 instance for a GitHub Actions runner
+2. Installing the runner & dependencies
+3. Connecting it to GitHub
+4. Deploying to a staging environment
+
+### 1️⃣ Launch EC2 for GitHub Actions Runner
+![Ec2](./images/ec2.png)
+
+### 🔧 Install Docker Engine
 
 After opening the terminal, follow these steps:
 
@@ -29,11 +75,11 @@ sudo systemctl restart jenkins
 
 ---
 
-## 📦 Prerequisite Plugin Installation
+### 📦 Prerequisite Plugin Installation
 
 Before proceeding with the pipeline setup or deployment process, ensure the following plugins are installed in your CI/CD environment (e.g., Jenkins).
 
-### ✅ Required Plugins
+#### ✅ Required Plugins
 
 | Plugin Name        | Purpose |
 |--------------------|---------|
@@ -58,7 +104,7 @@ Before proceeding with the pipeline setup or deployment process, ensure the foll
 
 ---
 
-## 🛠️ Shared Library Setup
+### 🛠️ Shared Library Setup
 
 To configure the global library in Jenkins:
 
@@ -89,7 +135,7 @@ This will enable you to use the shared functions and utilities defined in the li
 
 ---
 
-## 📨 Configure SMTP in Jenkins for Email Notifications
+### 📨 Configure SMTP in Jenkins for Email Notifications
 
 #### Jenkins Extended E-mail Notification Configuration
 
@@ -117,7 +163,7 @@ This configuration enables Jenkins to send emails using Gmail SMTP.
 
 ---
 
-## 🔐 Credentials Setup (Required)
+### 🔐 Credentials Setup (Required)
 
 Please add the following credentials in Jenkins:
 
@@ -139,7 +185,7 @@ Then cloudflare add domain
 
 ---
 
-## 🌍 Jenkins Global Environment Variables
+### 🌍 Jenkins Global Environment Variables
 
 This document outlines the global environment variables configured in Jenkins.
 
@@ -163,9 +209,9 @@ Environment variables are enabled globally.
 
 ---
 
-## 🔧 Webhook Configuration in GitHub
+### 🔧 Webhook Configuration in GitHub
 
-### ✅ Step-by-Step: How to Add a GitHub Webhook
+#### ✅ Step-by-Step: How to Add a GitHub Webhook
 
 1. **Go to Your Repository**
    - Open your GitHub repository (e.g., `https://github.com/psagar-dev/flask-cicd`)
@@ -198,7 +244,7 @@ Environment variables are enabled globally.
 
 ---
 
-## 🚀 Jenkins Pipeline Configuration for `flask-cicd`
+### 🚀 Jenkins Pipeline Configuration for `flask-cicd`
 
 1. **Log in to Jenkins**
 2. **Click on “New Item”**
@@ -209,7 +255,7 @@ Environment variables are enabled globally.
 5. **Click “OK”**
    - This will take you to the configuration page for the new pipeline job
 
-### 📁 Pipeline Definition
+#### 📁 Pipeline Definition
 
 - **Definition**: Pipeline script from SCM
 - **SCM**: Git
@@ -218,11 +264,11 @@ Environment variables are enabled globally.
 - **Branch Specifier**: `main`
 - **Script Path**: `Jenkinsfile`
 
-### ⚡ Trigger
+#### ⚡ Trigger
 
 - [x] GitHub hook trigger for GITScm polling 
 
-### 📝 Notes
+#### 📝 Notes
 
 - This configuration uses a declarative pipeline stored in the `main` branch under the file `Jenkinsfile`.
 - Ensure that the **GitHub webhook** is properly configured in your GitHub repository settings to trigger Jenkins jobs automatically.
@@ -231,7 +277,7 @@ Environment variables are enabled globally.
 
 ---
 
-# 📄 Jenkinsfile
+### 📄 Jenkinsfile
 
 📌 The shared library used in this pipeline:  
 🔗 [jenkins-shared-libraries](https://github.com/psagar-dev/jenkins-shared-libraries)
@@ -350,7 +396,7 @@ pipeline {
 
 ---
 
-## 📬 Notifications
+### 📬 Notifications
 
 - ✅ **Success**: Sends email to `${env.FLASK_EMAIL_RECIPIENTS}`
 - ❌ **Failure**: Sends alert email on pipeline failure
@@ -360,7 +406,7 @@ pipeline {
 
 ---
 
-## 🖥️ Deployment Details
+### 🖥️ Deployment Details
 
 - Uses `sshagent` with credential ID: `ssh-ec2`
 - Maps port: `80 (host)` → `5000 (container)`
@@ -368,8 +414,9 @@ pipeline {
 
 ---
 
-## 🚀 Pipeline Overview
+### 🚀 Pipeline Overview
 
 📷 ![Pipeline Overview](./images/jenkins/pipline-overview.png)
 
+### **🌍 Production App Live:**
 ![Deploy](./images/jenkins/deploy.png)
