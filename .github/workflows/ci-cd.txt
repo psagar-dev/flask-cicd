@@ -238,9 +238,9 @@ jobs:
                   --task-definition $TASK_DEF_ARN \
                   --force-new-deployment
                   
-    notify-on-success:
+    notify-on-success-main:
       runs-on: self-hosted
-      needs: [install-dependencies,security-check, run-tests, deploy-production, deploy-staging]
+      needs: [install-dependencies,security-check, run-tests, deploy-production]
       if: success()
       steps:
         - name: Send Slack Notification on Success
@@ -276,9 +276,85 @@ jobs:
           env:
             SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-    notify-on-failure:
+    notify-on-failure-main:
         runs-on: self-hosted
-        needs: [install-dependencies,security-check, run-tests, deploy-production, deploy-staging]
+        needs: [install-dependencies,security-check, run-tests, deploy-production]
+        if: failure()
+        steps:
+          - name: Send Slack Notification on Failure
+            uses: slackapi/slack-github-action@v2.0.0
+            with:
+              payload: |
+                {
+                  "text": "❌ *CI/CD Pipeline Failed!*",
+                  "attachments": [
+                    {
+                      "color": "#ff0000",
+                      "fields": [
+                        {
+                          "title": "Repo",
+                          "value": "${{ github.repository }}",
+                          "short": true
+                        },
+                        {
+                          "title": "Branch",
+                          "value": "${{ github.ref_name }}",
+                          "short": true
+                        },
+                        {
+                          "title": "Commit",
+                          "value": "${{ github.sha }}",
+                          "short": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              webhook-type: incoming-webhook
+            env:
+              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    notify-on-success-staging:
+      runs-on: self-hosted
+      needs: [install-dependencies,security-check, run-tests, deploy-staging]
+      if: success()
+      steps:
+        - name: Send Slack Notification on Success
+          uses: slackapi/slack-github-action@v2.0.0
+          with:
+            payload: |
+              {
+                "text": "✅ *CI/CD Pipeline Succeeded!*",
+                "attachments": [
+                  {
+                    "color": "#2eb886",
+                    "fields": [
+                      {
+                        "title": "Repo",
+                        "value": "${{ github.repository }}",
+                        "short": true
+                      },
+                      {
+                        "title": "Branch",
+                        "value": "${{ github.ref_name }}",
+                        "short": true
+                      },
+                      {
+                        "title": "Commit",
+                        "value": "${{ github.sha }}",
+                        "short": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            webhook-type: incoming-webhook
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    notify-on-failure-staging:
+        runs-on: self-hosted
+        needs: [install-dependencies,security-check, run-tests, deploy-staging]
         if: failure()
         steps:
           - name: Send Slack Notification on Failure
