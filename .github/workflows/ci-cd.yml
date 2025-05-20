@@ -27,12 +27,12 @@ jobs:
               pip install -r requirements.txt
 
     security-check:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         needs: install-dependencies
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-
+              
             
             - name: Trivy Installation
               run: |
