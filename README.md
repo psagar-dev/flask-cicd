@@ -1,3 +1,9 @@
+# 🚀 Project List
+
+- [Jenkins CI/CD Pipeline for Flask App](#jenkins-cicd-pipeline-for-flask-app)
+- [Flask CI/CD Pipeline: GitHub Actions → AWS ECS Fargate](#flask-cicd-pipeline-github-actions--aws-ecs-fargate)
+
+
 ## 🚀 **Jenkins CI/CD Pipeline for Flask App**
 
 This setup uses **Jenkins** to automate the build, test, security scan, Dockerization, and deployment of a Flask application to a remote EC2 server, with notifications for each pipeline run.
@@ -423,7 +429,7 @@ pipeline {
 ---
 
 
-### 🚀 Flask CI/CD Pipeline: GitHub Actions → AWS ECS Fargate
+## 🚀 Flask CI/CD Pipeline: GitHub Actions → AWS ECS Fargate
 
 Automate the build, test, security scan, and deployment of your Flask app using **GitHub Actions**, **AWS ECR/ECS (Fargate)**, **Cloudflare DNS**, and **Slack** notifications.
 
