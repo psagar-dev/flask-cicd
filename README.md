@@ -1,7 +1,7 @@
-# 🚀 Project List
+## 🔗 Project List
 
 - [Jenkins CI/CD Pipeline for Flask App](#jenkins-cicd-pipeline-for-flask-app)
-- [Flask CI/CD Pipeline: GitHub Actions → AWS ECS Fargate](#flask-cicd-pipeline-github-actions--aws-ecs-fargate)
+- [Flask CI/CD Pipeline: GitHub Actions → AWS ECS Fargate](#flask-cicd-pipeline-github-actions-aws-ecs-fargate)
 
 
 
